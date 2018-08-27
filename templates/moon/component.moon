@@ -1,5 +1,5 @@
-Component = require({{components_path}})
+Component = require("{components_path}")
 
-{{component_name}} = Component()
+{component_name} = Component()
 
-return {{component_name}}
+return {component_name}
