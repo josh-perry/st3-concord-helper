@@ -1,6 +1,6 @@
 [
   {
     "caption": "Concord - Create new component",
-    "command": "create_new_component"
+    "command": "create_new_ecs_file"
   }
 ]
