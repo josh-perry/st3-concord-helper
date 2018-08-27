@@ -1,0 +1,6 @@
+{
+  "output_directories": {
+    "components": "src/components",
+    "systems": "src/systems"
+  }
+}
