@@ -2,13 +2,12 @@ import os
 import sublime
 import sublime_plugin
 
-
 settings_file = "concord-helper.sublime-settings"
 settings = sublime.load_settings(settings_file)
 
 
 class CreateNewEcsFileCommand(sublime_plugin.WindowCommand):
-    def run(self):
+    def run(self, **args):
         window = self.window
 
         language = settings.get("language")
@@ -27,33 +26,63 @@ class CreateNewEcsFileCommand(sublime_plugin.WindowCommand):
         self.component_output_dir = os.path.join(project_path, s["components"])
         self.system_output_dir = os.path.join(project_path, s["systems"])
 
-        window.show_input_panel("Name", "", self.component_on_done, None, None)
+        if args["fileType"] == "component":
+            window.show_input_panel("Component Name",
+                                    "",
+                                    self.component_on_done,
+                                    None,
+                                    None)
+        elif args["fileType"] == "system":
+            window.show_input_panel("System Name",
+                                    "",
+                                    self.system_on_done,
+                                    None,
+                                    None)
 
     def component_on_done(self, input):
-        window = self.window
-
         filename = "{0}.{1}".format(input, settings.get("language"))
         output_file = os.path.join(self.component_output_dir, filename)
 
-        if os.path.isfile(output_file):
-            status = "File already exists!"
-            window.active_view().set_status("concord-helper", status)
-            return
-
+        components_path = settings.get("project_concord_path") + ".component"
         data = {
-            "components_path": settings.get("project_concord_path"),
+            "components_path": components_path,
             "component_name": input
         }
 
-        if self.write_file(data, output_file):
-            window.open_file(output_file)
+        self.check_file(self.component_template, output_file, data)
+
+    def system_on_done(self, input):
+        filename = "{0}.{1}".format(input, settings.get("language"))
+        output_file = os.path.join(self.system_output_dir, filename)
+
+        system_path = settings.get("project_concord_path") + ".system"
+        data = {
+            "systems_path": system_path,
+            "system_name": input,
+            "component_requires": "",
+            "component_list": "{Something, SomethingElse}",
+            "system_callback": "draw"
+        }
+
+        self.check_file(self.system_template, output_file, data)
+
+    def check_file(self, fileType, output_file, data):
+        if os.path.isfile(output_file):
+            status = "File already exists!"
+            self.window.active_view().set_status("concord-helper", status)
+            return False
+
+        if self.write_file(fileType, data, output_file):
+            self.window.open_file(output_file)
         else:
             status = "Failed to write to file!"
-            window.active_view().set_status("concord-helper", status)
+            self.window.active_view().set_status("concord-helper", status)
 
-    def write_file(self, data, output_file):
+        return True
+
+    def write_file(self, template, data, output_file):
         # Read template
-        with open(self.component_template, 'r') as in_file:
+        with open(template, 'r') as in_file:
             content = in_file.read()
 
             # Write template

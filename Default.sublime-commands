@@ -1,6 +1,12 @@
 [
   {
     "caption": "Concord - Create new component",
-    "command": "create_new_ecs_file"
+    "command": "create_new_ecs_file",
+    "args": {"fileType": "component"}
+  },
+  {
+    "caption": "Concord - Create new system",
+    "command": "create_new_ecs_file",
+    "args": {"fileType": "system"}
   }
 ]
